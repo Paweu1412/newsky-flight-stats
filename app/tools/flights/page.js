@@ -57,13 +57,13 @@ export default function Dashboard() {
           <Stack spacing={2} direction="row">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={['DatePicker']}>
-                <DatePicker onChange={(value) => {console.log(value); setFromDate(toTimestamp(value))}} label="From" />
+                <DatePicker onChange={(value) => {setFromDate(value)}} label="From" />
               </DemoContainer>
             </LocalizationProvider>
           
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={['DatePicker']}>
-                <DatePicker onChange={(value) => {console.log(value); setToDate(toTimestamp(value))}} label="To" />
+                <DatePicker onChange={(value) => {setToDate(value)}} label="To" />
               </DemoContainer>
             </LocalizationProvider>
           </Stack>
