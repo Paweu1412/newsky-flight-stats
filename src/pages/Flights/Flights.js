@@ -1,9 +1,8 @@
-"use client";
-
 import { useState, useEffect } from 'react';
 import { Button, Stack, FormControl, FormControlLabel, Checkbox, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/en-gb';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -21,18 +20,18 @@ const columns = [
       </div>
     ), 
   },
-  { field: 'dep.icao', headerName: 'Departure', width: 80, editable: false, valueGetter: (params) => params.row.dep.icao },
+  { field: 'dep.icao', headerName: 'Departure', width: 120, editable: false, valueGetter: (params) => params.row.dep.icao },
   { field: 'depTimeAct', headerName: 'Departure Time', width: 150, editable: false, valueGetter: (params) => new Date(params.row.depTimeAct).toLocaleString() },
-  { field: 'arr.icao', headerName: 'Arrival', width: 80, editable: false, valueGetter: (params) => params.row.arr.icao },
+  { field: 'arr.icao', headerName: 'Arrival', width: 110, editable: false, valueGetter: (params) => params.row.arr.icao },
   { field: 'arrTimeAct', headerName: 'Arrival Time', width: 150, editable: false, valueGetter: (params) => new Date(params.row.arrTimeAct).toLocaleString() },
   { field: 'aircraft.airframe.name', headerName: 'Aircraft', width: 190, editable: false, valueGetter: (params) => params.row.aircraft.airframe.name },
-  { field: 'result.totals.distance', headerName: 'Distance', width: 100, editable: false, valueGetter: (params) => params.row.result.totals.distance + ' nm'},
-  { field: 'result.totals.time', headerName: 'Duration', width: 100, editable: false, valueGetter: (params) => params.row.result.totals.time + ' min' },
-  { field: 'simulator', headerName: 'Simulator', width: 100, editable: false, valueGetter: (params) => params.row.simulator.toUpperCase() },
-  { field: 'network.name', headerName: 'Network', width: 100, editable: false, valueGetter: (params) => (params.row.network?.name || '-').toUpperCase() },
+  { field: 'result.totals.distance', headerName: 'Distance', width: 110, editable: false, valueGetter: (params) => params.row.result.totals.distance + ' nm'},
+  { field: 'result.totals.time', headerName: 'Duration', width: 110, editable: false, valueGetter: (params) => params.row.result.totals.time + ' min' },
+  { field: 'simulator', headerName: 'Simulator', width: 110, editable: false, valueGetter: (params) => params.row.simulator.toUpperCase() },
+  { field: 'network.name', headerName: 'Network', width: 110, editable: false, valueGetter: (params) => (params.row.network?.name || '-').toUpperCase() },
 ];
 
-export default function Flights() {
+const Flights = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [allFlights, setAllFlights] = useState([]);
@@ -49,7 +48,7 @@ export default function Flights() {
     }
 
     const url = 'https://newsky.app/api/airline-api/flights/bydate';
-    const token = process.env.NEXT_PUBLIC_TOKEN;
+    const token = process.env.REACT_APP_TOKEN;
 
     try {
       const response = await fetch(url, {
@@ -99,13 +98,13 @@ export default function Flights() {
       <div className="container w-full xl:w-max p-2 flex flex-col items-center">
         <div className="date-placeholders pt-5">
           <Stack spacing={2} direction={{ base: 'column', lg: 'row' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
               <DemoContainer components={['DatePicker']}>
                 <DatePicker onChange={(value) => setFromDate(value)} label="From" />
               </DemoContainer>
             </LocalizationProvider>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
               <DemoContainer components={['DatePicker']}>
                 <DatePicker onChange={(value) => {
                   let dateWithOneDayAdded = new Date(value);
@@ -146,6 +145,13 @@ export default function Flights() {
               autoHeight
               pagination
               pageSize={25}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 10,
+                  },
+                },
+              }}
               disableSelectionOnClick
             />
           )}
@@ -154,3 +160,5 @@ export default function Flights() {
     </div>
   );
 }
+
+export default Flights;

@@ -4,4 +4,9 @@
 
 body {
   margin: 0;
+  font-family: Inter;
+}
+
+.MuiDataGrid-menuIcon {
+  display: none !important;
 }
