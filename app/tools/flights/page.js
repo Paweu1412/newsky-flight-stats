@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { Button, Stack } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Button, Stack, FormControl, FormControlLabel, Checkbox, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -21,24 +21,36 @@ const columns = [
       </div>
     ), 
   },
-  { field: 'dep.icao', headerName: 'Departure', width: 100, editable: false, valueGetter: (params) => params.row.dep.icao },
-  { field: 'arr.icao', headerName: 'Arrival', width: 100, editable: false, valueGetter: (params) => params.row.arr.icao },
-  { field: 'aircraft.airframe.name', headerName: 'Aircraft', width: 150, editable: false, valueGetter: (params) => params.row.aircraft.airframe.name },
+  { field: 'dep.icao', headerName: 'Departure', width: 80, editable: false, valueGetter: (params) => params.row.dep.icao },
+  { field: 'depTimeAct', headerName: 'Departure Time', width: 150, editable: false, valueGetter: (params) => new Date(params.row.depTimeAct).toLocaleString() },
+  { field: 'arr.icao', headerName: 'Arrival', width: 80, editable: false, valueGetter: (params) => params.row.arr.icao },
+  { field: 'arrTimeAct', headerName: 'Arrival Time', width: 150, editable: false, valueGetter: (params) => new Date(params.row.arrTimeAct).toLocaleString() },
+  { field: 'aircraft.airframe.name', headerName: 'Aircraft', width: 190, editable: false, valueGetter: (params) => params.row.aircraft.airframe.name },
   { field: 'result.totals.distance', headerName: 'Distance', width: 100, editable: false, valueGetter: (params) => params.row.result.totals.distance + ' nm'},
   { field: 'result.totals.time', headerName: 'Duration', width: 100, editable: false, valueGetter: (params) => params.row.result.totals.time + ' min' },
   { field: 'simulator', headerName: 'Simulator', width: 100, editable: false, valueGetter: (params) => params.row.simulator.toUpperCase() },
   { field: 'network.name', headerName: 'Network', width: 100, editable: false, valueGetter: (params) => (params.row.network?.name || '-').toUpperCase() },
 ];
 
-export default function Dashboard() {
+export default function Flights() {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
-  const [flights, setFlights] = useState([]);
+  const [allFlights, setAllFlights] = useState([]);
+  const [displayedFlights, setDisplayedFlights] = useState([]);
+  const [showOnlyVatsimFlights, setShowOnlyVatsimFlights] = useState(false);
+  const [errorAlert, setErrorAlert] = useState(null);
 
   const fetchFlights = async () => {
+    setErrorAlert(null);
+
+    if (!fromDate || !toDate) {
+      setErrorAlert('Please select both dates.');
+      return;
+    }
+
     const url = 'https://newsky.app/api/airline-api/flights/bydate';
     const token = process.env.NEXT_PUBLIC_TOKEN;
-  
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -48,29 +60,45 @@ export default function Dashboard() {
         },
         body: JSON.stringify({ start: fromDate.toISOString(), end: toDate.toISOString() }),
       });
-  
+
       if (response.ok) {
         let data = await response.json();
         data = data.results.map((flight, index) => ({ ...flight, id: index }));
-  
-        setFlights(data);
+
+        setAllFlights(data);
+        setDisplayedFlights(showOnlyVatsimFlights ? data.filter((flight) => flight.network?.name === 'vatsim') : data);
+      } else if (response.status === 429) {
+        setErrorAlert('Too many requests. Please try again later.');
       } else {
         console.error('Failed to fetch flights');
       }
     } catch (error) {
       console.error('Error fetching flights', error);
+      setErrorAlert('An error occurred. Please try again.');
     }
-  };  
+  };
+
+  useEffect(() => {
+    const filterFlights = () => {
+      setDisplayedFlights(showOnlyVatsimFlights ? allFlights.filter((flight) => flight.network?.name === 'vatsim') : allFlights);
+    };
+
+    filterFlights();
+  }, [showOnlyVatsimFlights, allFlights]);
 
   const handleCheckFlights = () => {
     fetchFlights();
   };
 
+  const handleCheckboxChange = (event) => {
+    setShowOnlyVatsimFlights(event.target.checked);
+  };
+
   return (
     <div className="Dashboard flex justify-center">
-      <div className="container w-max flex flex-col items-center">
+      <div className="container w-full xl:w-max p-2 flex flex-col items-center">
         <div className="date-placeholders pt-5">
-          <Stack spacing={2} direction="row">
+          <Stack spacing={2} direction={{ base: 'column', lg: 'row' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={['DatePicker']}>
                 <DatePicker onChange={(value) => setFromDate(value)} label="From" />
@@ -79,37 +107,48 @@ export default function Dashboard() {
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={['DatePicker']}>
-                <DatePicker onChange={(value) => setToDate(value)} label="To" />
+                <DatePicker onChange={(value) => {
+                  let dateWithOneDayAdded = new Date(value);
+                  dateWithOneDayAdded.setDate(dateWithOneDayAdded.getDate() + 1);
+
+                  setToDate(dateWithOneDayAdded);
+                }} label="To" />
               </DemoContainer>
             </LocalizationProvider>
           </Stack>
 
-          <label>
-          <input
-            type="checkbox"
-            // checked={onlyVatsim}
-            // onChange={() => setOnlyVatsim(!onlyVatsim)}
-          />
-          Only VATSIM
-        </label>
+          <FormControl className="mt-2">
+            <FormControlLabel control={<Checkbox />} label="Show only VATSIM flights" onChange={handleCheckboxChange} />
+          </FormControl>
 
-          <Button variant="contained" className="mt-5 w-[100%] bg-second" onClick={handleCheckFlights}>
+          <Button variant="contained" className="w-full bg-second mt-2" onClick={handleCheckFlights}>
             CHECK FLIGHTS
           </Button>
+
+          {errorAlert && <Alert severity="error" className="mt-5">{errorAlert}</Alert>}
+
+          {displayedFlights.length === 0 && !errorAlert && (
+            <Alert severity="info" className="mt-5">
+              Click on <b>CHECK FLIGHTS</b> to see the results
+            </Alert>
+          )}
+
+          <Alert severity="warning" className="mt-5">
+            Maximum 500 flights will be shown
+          </Alert>
         </div>
 
-        <div className="flights-table w-max mt-5">
-         {flights.length > 0 &&
+        <div className="flights-table w-full mt-5 overflow-x-auto">
+          {displayedFlights.length > 0 && (
             <DataGrid
-              rows={flights}
+              rows={displayedFlights}
               columns={columns}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 25, page: 0 },
-                },
-              }}
+              autoHeight
+              pagination
+              pageSize={25}
+              disableSelectionOnClick
             />
-          }
+          )}
         </div>
       </div>
     </div>
