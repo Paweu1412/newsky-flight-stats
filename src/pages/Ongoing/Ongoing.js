@@ -14,9 +14,10 @@ const columns = [
       </div>
     ), 
   },
+  { field: 'airline.icao + flightNumber', headerName: 'C/S', width: 90, editable: false, valueGetter: (params) => params.row.airline.icao + params.row.flightNumber},
   { field: 'dep.icao', headerName: 'Departure', width: 120, editable: false, valueGetter: (params) => params.row.dep.icao },
-  { field: 'arr.icao', headerName: 'Arrival', width: 110, editable: false, valueGetter: (params) => params.row.arr.icao },
-  { field: 'depTimeAct', headerName: 'In air', width: 100, editable: false, 
+  { field: 'arr.icao', headerName: 'Arrival', width: 100, editable: false, valueGetter: (params) => params.row.arr.icao },
+  { field: 'depTimeAct', headerName: 'In flight', width: 100, editable: false, 
     valueGetter: (params) => {
       const depTimeAct = new Date(params.row.depTimeAct);
       const currentTime = new Date();
@@ -24,10 +25,8 @@ const columns = [
       return diffInMinutes + ' min';
     } 
   },
-  { field: 'aircraft.airframe.name', headerName: 'Aircraft', width: 190, editable: false, valueGetter: (params) => params.row.aircraft.airframe.name },
-  { field: 'simulator', headerName: 'Simulator', width: 110, editable: false, valueGetter: (params) => params.row.simulator.toUpperCase() },
+  { field: 'aircraft.airframe.icao', headerName: 'Aircraft', width: 100, editable: false, valueGetter: (params) => params.row.aircraft.airframe.icao },
   { field: 'network.name', headerName: 'Network', width: 110, editable: false, valueGetter: (params) => (params.row.network?.name || '-').toUpperCase() },
-  { field: 'emergency', headerName: 'EMG', width: 90, editable: false, valueGetter: (params) => (params.row.emergency === true ? '<p style="color: red">YES</p>' : '-') }
 ];
 
 const Ongoing = () => {

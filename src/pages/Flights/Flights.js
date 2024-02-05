@@ -20,13 +20,31 @@ const columns = [
       </div>
     ), 
   },
+  { field: 'airline.icao + flightNumber', headerName: 'C/S', width: 90, editable: false, valueGetter: (params) => params.row.airline.icao + params.row.flightNumber},
   { field: 'dep.icao', headerName: 'Departure', width: 120, editable: false, valueGetter: (params) => params.row.dep.icao },
-  { field: 'depTimeAct', headerName: 'Departure Time', width: 150, editable: false, valueGetter: (params) => new Date(params.row.depTimeAct).toLocaleString() },
-  { field: 'arr.icao', headerName: 'Arrival', width: 110, editable: false, valueGetter: (params) => params.row.arr.icao },
-  { field: 'arrTimeAct', headerName: 'Arrival Time', width: 150, editable: false, valueGetter: (params) => new Date(params.row.arrTimeAct).toLocaleString() },
-  { field: 'aircraft.airframe.name', headerName: 'Aircraft', width: 190, editable: false, valueGetter: (params) => params.row.aircraft.airframe.name },
+  { field: 'arr.icao', headerName: 'Arrival', width: 120, editable: false, valueGetter: (params) => params.row.arr.icao },
+  { field: 'arrTimeAct', headerName: 'Arrival Time', width: 150, editable: false, 
+    valueGetter: (params) => {
+      const rawDate = new Date(params.row.arrTimeAct);
+      const roundedDate = new Date(Math.round(rawDate.getTime() / (60 * 1000)) * (60 * 1000));
+      
+      const formattedDate = roundedDate.toLocaleDateString();
+      const formattedTime = roundedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+      return `${formattedDate} ${formattedTime}`;
+    },
+  },
+  { field: 'aircraft.airframe.icao', headerName: 'Aircraft', width: 100, editable: false, valueGetter: (params) => params.row.aircraft.airframe.icao },
   { field: 'result.totals.distance', headerName: 'Distance', width: 110, editable: false, valueGetter: (params) => params.row.result.totals.distance + ' nm'},
-  { field: 'result.totals.time', headerName: 'Duration', width: 110, editable: false, valueGetter: (params) => params.row.result.totals.time + ' min' },
+  { field: 'result.totals.time', headerName: 'Duration', width: 110, editable: false, 
+    valueGetter: (params) => {
+      const totalMinutes = params.row.result.totals.time;
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      return `${hours}h ${minutes}min`;
+    },
+  },
   { field: 'simulator', headerName: 'Simulator', width: 110, editable: false, valueGetter: (params) => params.row.simulator.toUpperCase() },
   { field: 'network.name', headerName: 'Network', width: 110, editable: false, valueGetter: (params) => (params.row.network?.name || '-').toUpperCase() },
 ];
