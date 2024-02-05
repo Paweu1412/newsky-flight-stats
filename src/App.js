@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 
 import Flights from './pages/Flights/Flights';
 import Ongoing from './pages/Ongoing/Ongoing';
@@ -9,8 +9,8 @@ const App = () => {
     <React.StrictMode>
       <Router>
         <Routes>
-          <Route path="/paffsair/flights" element={<Flights />} />
-          <Route path="/paffsair/ongoing" element={<Ongoing />} />
+          <Route path="/flights" element={<Flights />} />
+          <Route path="/ongoing" element={<Ongoing />} />
         </Routes>
       </Router>
     </React.StrictMode>
