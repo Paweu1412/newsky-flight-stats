@@ -22,7 +22,10 @@ const columns = [
       const depTimeAct = new Date(params.row.depTimeAct);
       const currentTime = new Date();
       const diffInMinutes = Math.round((currentTime - depTimeAct) / (1000 * 60));
-      return diffInMinutes + ' min';
+      const hours = Math.floor(diffInMinutes / 60);
+      const minutes = diffInMinutes % 60;
+
+      return `${hours}h ${minutes}min`;
     } 
   },
   { field: 'aircraft.airframe.icao', headerName: 'Aircraft', width: 100, editable: false, valueGetter: (params) => params.row.aircraft.airframe.icao },
