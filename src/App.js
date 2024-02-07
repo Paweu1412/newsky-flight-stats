@@ -6,14 +6,14 @@ import Ongoing from './pages/Ongoing/Ongoing';
 
 const App = () => {
   return (
-    <React.StrictMode>
+    // <React.StrictMode>
       <Router>
         <Routes>
           <Route path="/flights" element={<Flights />} />
           <Route path="/ongoing" element={<Ongoing />} />
         </Routes>
       </Router>
-    </React.StrictMode>
+    // </React.StrictMode>
   );
 };
 

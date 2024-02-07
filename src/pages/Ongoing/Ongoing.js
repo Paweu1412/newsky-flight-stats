@@ -53,10 +53,10 @@ const Ongoing = () => {
       });
 
       if (response.ok) {
-        let data = await response.json();
-        data = data.results.map((flight, index) => ({ ...flight, id: index }));
+        const data = await response.json();
+        const results = data.results.map((flight, index) => ({ ...flight, id: index }));
 
-        setAllFlights(data);
+        setAllFlights(results);
       } else if (response.status === 429) {
         console.error('Too many redirects');
       } else {
@@ -70,7 +70,6 @@ const Ongoing = () => {
   return (
     <div className="Ongoing flex justify-center">
       <div className="container w-max mt-5 overflow-x-auto p-2 ">
-        {allFlights.length > 0 && (
           <DataGrid
             rows={allFlights}
             columns={columns}
@@ -79,14 +78,12 @@ const Ongoing = () => {
             pageSize={25}
             initialState={{
               pagination: {
-                paginationModel: {
-                  pageSize: 10,
-                },
+                pageSize: 10,
               },
             }}
             disableSelectionOnClick
+            localeText={{ noRowsLabel: 'No ongoing flights at the moment' }}
           />
-        )}
       </div>
     </div>
   );
