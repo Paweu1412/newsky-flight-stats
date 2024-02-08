@@ -19,6 +19,10 @@ const columns = [
   { field: 'arr.icao', headerName: 'Arrival', width: 100, editable: false, valueGetter: (params) => params.row.arr.icao },
   { field: 'depTimeAct', headerName: 'In flight', width: 100, editable: false, 
     valueGetter: (params) => {
+      if (params.row.depTimeAct === null) {
+        return "0h 0min";
+      }
+
       const depTimeAct = new Date(params.row.depTimeAct);
       const currentTime = new Date();
       const diffInMinutes = Math.round((currentTime - depTimeAct) / (1000 * 60));
